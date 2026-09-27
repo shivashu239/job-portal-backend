@@ -74,7 +74,7 @@ public class SecurityConfig {
                 ).permitAll()
 
                 // USER + ADMIN can view/search jobs
-                .requestMatchers(HttpMethod.GET, "/jobs")
+                .requestMatchers(HttpMethod.GET, "/jobs/**")
                     .hasAnyRole("USER", "ADMIN")
 
                 .requestMatchers(HttpMethod.GET, "/jobs/search/**")

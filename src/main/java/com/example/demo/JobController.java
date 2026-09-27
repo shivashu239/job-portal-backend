@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +22,14 @@ import jakarta.validation.Valid;
 public class JobController {
 
     private final JobService jobService;
+    private final JobViewService jobViewService;
 
-    public JobController(JobService jobService) {
+    public JobController(
+            JobService jobService,
+            JobViewService jobViewService) {
+
         this.jobService = jobService;
+        this.jobViewService = jobViewService;
     }
 
     @GetMapping
@@ -32,8 +38,18 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-    public Job getJobById(@PathVariable int id) {
-        return jobService.getJobById(id);
+    public Job getJobById(
+            @PathVariable int id,
+            Authentication authentication) {
+
+        Job job = jobService.getJobById(id);
+
+        jobViewService.recordView(
+                id,
+                authentication.getName()
+        );
+
+        return job;
     }
 
     @GetMapping("/search")
@@ -42,7 +58,9 @@ public class JobController {
     }
 
     @GetMapping("/search/location")
-    public List<Job> searchJobsByLocation(@RequestParam String location) {
+    public List<Job> searchJobsByLocation(
+            @RequestParam String location) {
+
         return jobService.searchJobsByLocation(location);
     }
 
@@ -51,11 +69,15 @@ public class JobController {
             @RequestParam String title,
             @RequestParam String location) {
 
-        return jobService.searchJobsByTitleAndLocation(title, location);
+        return jobService.searchJobsByTitleAndLocation(
+                title,
+                location);
     }
 
     @PostMapping
-    public Job addJob(@Valid @RequestBody Job job) {
+    public Job addJob(
+            @Valid @RequestBody Job job) {
+
         return jobService.addJob(job);
     }
 
